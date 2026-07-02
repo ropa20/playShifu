@@ -29,23 +29,33 @@ const en = {
   },
 
   benefits: {
-    title: 'Meet Lovabies',
-    subtitle:
-      'A playful companion designed to make everyday moments more magical.',
+    title: 'Stories that hug back!',
+    subtitle: 'Every story & song, now in a huggable, screen-free friend.',
 
-    item1: 'Interactive stories and activities',
-    item2: 'Gentle routines for children',
-    item3: 'Simple and parent-friendly controls',
+    appOnly: 'App\nonly',
+    appPlus: 'App +\nPlush',
 
-    continue: 'Continue',
+    listenOnPhone: 'Listen on phone',
+    basicStories: 'Basic stories & rhymes',
+    hugAnywhere: 'Hug & listen anywhere',
+    offlinePlayback: 'Offline playback',
+    physicalButtons: 'Physical buttons',
+    fullLibrary: 'Access to full library',
+    recordVoice: 'Record your own voice',
+    sleepTimer: 'Sleep timer',
+    contentUpdates: 'Content updates',
+
+    primary: 'Bring a buddy home!',
+    secondary: 'Maybe later – keep exploring',
   },
 
   parental: {
-    title: 'For grown-ups',
-    subtitle: 'Please solve this quick check to continue.',
-    question: 'What is 3 + 4?',
-    placeholder: 'Enter the answer',
-    continue: 'Continue',
+    screenLabel: 'Screen 5',
+    title: 'Parental Lock',
+    subtitle: 'Solve the following equation to continue',
+    question: '6×(1+4)',
+    placeholder: 'Type here...',
+    next: 'Next',
     error: 'That answer is not correct. Try again.',
   },
 

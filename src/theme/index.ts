@@ -19,6 +19,10 @@ export const colors = {
   lovabiesButton: '#312965',
   lovabiesButtonShadow: '#211B55',
   white: '#FFFFFF',
+  comparisonTable: '#55489E',
+  comparisonGreen: '#0CC63E',
+  comparisonRed: '#FF4B3E',
+  comparisonLine: 'rgba(255, 255, 255, 0.18)',
 } as const;
 
 export const spacing = {

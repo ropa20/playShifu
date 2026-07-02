@@ -1,103 +1,229 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { BackButton } from '../components/common/BackButton';
-import { PrimaryButton } from '../components/common/PrimaryButton';
-import { ScreenContainer } from '../components/common/ScreenContainer';
+import { ComparisonTable } from '../components/benefits/ComparisonTable';
+import { LovabiesButton } from '../components/common/LovabiesButton';
 import { RootStackParamList } from '../navigation/types';
-import { colors, radius, spacing } from '../theme';
+import { colors } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Benefits'>;
 
+const heroImage = require('../assets/images/Img2.png');
+
 export function BenefitsScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { width, height } = useWindowDimensions();
 
-  const benefits = [
-    t('benefits.item1'),
-    t('benefits.item2'),
-    t('benefits.item3'),
-  ];
+  const isLandscape = width > height;
+  const isTablet = Math.min(width, height) >= 600;
+
+  /*
+   * The source image is very wide, but the reference design displays it
+   * inside a taller full-width hero area using cover.
+   */
+  const heroHeight = isLandscape
+    ? Math.min(height * 0.72, 420)
+    : Math.min(width * 0.88, isTablet ? 560 : 380);
+
+  const goToParentalGate = () => {
+    navigation.navigate('ParentalGate');
+  };
 
   return (
-    <ScreenContainer>
-      <BackButton onPress={navigation.goBack} />
+    <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.safeArea}>
+      <StatusBar hidden />
 
-      <Text style={styles.title}>{t('benefits.title')}</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View
+          style={[
+            styles.heroSection,
+            {
+              height: heroHeight,
+            },
+          ]}
+        >
+          <Image
+            accessibilityLabel="Lovabies bear and unicorn toys"
+            accessibilityIgnoresInvertColors
+            resizeMode="cover"
+            source={heroImage}
+            style={styles.heroImage}
+          />
+        </View>
 
-      <Text style={styles.subtitle}>{t('benefits.subtitle')}</Text>
+        <View style={[styles.content, isTablet && styles.tabletContent]}>
+          <View style={styles.textSection}>
+            <Text
+              adjustsFontSizeToFit
+              numberOfLines={2}
+              style={[styles.title, isTablet && styles.tabletTitle]}
+            >
+              {t('benefits.title')}
+            </Text>
 
-      <View style={styles.benefitList}>
-        {benefits.map(benefit => (
-          <View key={benefit} style={styles.benefitCard}>
-            <View style={styles.bullet}>
-              <Text style={styles.check}>✓</Text>
-            </View>
-
-            <Text style={styles.benefitText}>{benefit}</Text>
+            <Text style={[styles.subtitle, isTablet && styles.tabletSubtitle]}>
+              {t('benefits.subtitle')}
+            </Text>
           </View>
-        ))}
-      </View>
 
-      <PrimaryButton
-        label={t('benefits.continue')}
-        onPress={() => navigation.navigate('ParentalGate')}
-      />
-    </ScreenContainer>
+          <View style={styles.tableContainer}>
+            <ComparisonTable />
+          </View>
+
+          <View style={styles.actions}>
+            <LovabiesButton
+              label={t('benefits.primary')}
+              onPress={goToParentalGate}
+              style={[styles.button, isTablet && styles.tabletButton]}
+              labelStyle={[
+                styles.primaryButtonLabel,
+                isTablet && styles.tabletButtonLabel,
+              ]}
+            />
+
+            <LovabiesButton
+              label={t('benefits.secondary')}
+              onPress={goToParentalGate}
+              variant="light"
+              style={[styles.button, isTablet && styles.tabletButton]}
+              labelStyle={[
+                styles.secondaryButtonLabel,
+                isTablet && styles.tabletButtonLabel,
+              ]}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.lovabiesPurple,
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: colors.lovabiesPurple,
+  },
+
+  heroSection: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: colors.lovabiesButton,
+  },
+
+  heroImage: {
+    width: '100%',
+    height: '100%',
+  },
+
+  content: {
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
+
+    paddingHorizontal: 30,
+    paddingTop: 18,
+    paddingBottom: 48,
+  },
+
+  tabletContent: {
+    maxWidth: 920,
+    paddingHorizontal: 56,
+    paddingTop: 28,
+    paddingBottom: 64,
+  },
+
+  textSection: {
+    width: '100%',
+    alignItems: 'center',
+  },
+
   title: {
-    color: colors.text,
-    fontSize: 34,
-    fontWeight: '800',
+    maxWidth: 360,
+
+    color: colors.white,
+    fontFamily: 'sans-serif-rounded',
+    fontSize: 36,
+    fontWeight: '900',
+    lineHeight: 40,
     textAlign: 'center',
+  },
+
+  tabletTitle: {
+    maxWidth: 600,
+    fontSize: 50,
+    lineHeight: 56,
   },
 
   subtitle: {
-    marginTop: spacing.sm,
-    color: colors.mutedText,
-    fontSize: 17,
-    lineHeight: 25,
+    maxWidth: 350,
+    marginTop: 14,
+
+    color: colors.white,
+    fontFamily: 'sans-serif-rounded',
+    fontSize: 19,
+    fontWeight: '400',
+    lineHeight: 27,
     textAlign: 'center',
   },
 
-  benefitList: {
-    marginVertical: spacing.xl,
-    gap: spacing.md,
+  tabletSubtitle: {
+    maxWidth: 650,
+    fontSize: 26,
+    lineHeight: 36,
   },
 
-  benefitCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
+  tableContainer: {
+    width: '100%',
+    marginTop: 24,
   },
 
-  bullet: {
-    width: 34,
-    height: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.pill,
-    backgroundColor: colors.primarySoft,
+  actions: {
+    width: '100%',
+    marginTop: 34,
+    gap: 30,
   },
 
-  check: {
-    color: colors.primary,
-    fontSize: 20,
-    fontWeight: '800',
+  button: {
+    minHeight: 66,
   },
 
-  benefitText: {
-    flex: 1,
-    marginLeft: spacing.md,
-    color: colors.text,
-    fontSize: 17,
-    lineHeight: 24,
-    fontWeight: '600',
+  tabletButton: {
+    minHeight: 78,
+  },
+
+  primaryButtonLabel: {
+    fontSize: 21,
+    fontWeight: '700',
+  },
+
+  secondaryButtonLabel: {
+    fontSize: 19,
+    fontWeight: '700',
+  },
+
+  tabletButtonLabel: {
+    fontSize: 25,
   },
 });
