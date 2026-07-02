@@ -14,6 +14,11 @@ export const colors = {
   success: '#2C8A5C',
 
   yellow: '#F3C94A',
+  lovabiesPurple: '#6252C7',
+  lovabiesPanel: '#4B4095',
+  lovabiesButton: '#312965',
+  lovabiesButtonShadow: '#211B55',
+  white: '#FFFFFF',
 } as const;
 
 export const spacing = {

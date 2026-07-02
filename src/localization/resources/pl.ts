@@ -5,8 +5,8 @@ const pl = {
   },
 
   language: {
-    title: 'Choose your language*',
-    subtitle: 'You can change this later.*',
+    title: 'Select a language*',
+    subtitle: 'You can always change this later in the settings.*',
     english: 'English*',
     polish: 'Polski*',
     confirm: 'Confirm*',
@@ -14,7 +14,8 @@ const pl = {
 
   welcome: {
     title: 'Welcome!*',
-    subtitle: 'Let’s get your Lovabies experience ready.*',
+    subtitle:
+      'Stories, songs and adventures await.*\nDo you have a Lovabies toy?*',
     yes: 'Yes, I have my toy!*',
     no: "No, I don't have one yet!*",
   },
