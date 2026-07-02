@@ -12,6 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { LovabiesButton } from '../components/common/LovabiesButton';
 import i18n from '../localization/i18n';
 import { RootStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -63,6 +64,7 @@ export function LanguageSelectionScreen({ navigation }: Props) {
           <View style={styles.headingSection}>
             <Text
               adjustsFontSizeToFit
+              minimumFontScale={0.8}
               numberOfLines={2}
               style={[styles.title, isCompactHeight && styles.compactTitle]}
             >
@@ -101,27 +103,19 @@ export function LanguageSelectionScreen({ navigation }: Props) {
             />
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('language.confirm')}
+          <LovabiesButton
+            label={t('language.confirm')}
+            variant="dark"
             onPress={confirmLanguage}
-            style={({ pressed }) => [
+            style={[
               styles.confirmButton,
               isCompactHeight && styles.compactConfirmButton,
-              pressed && styles.confirmButtonPressed,
             ]}
-          >
-            <Text
-              adjustsFontSizeToFit
-              numberOfLines={1}
-              style={[
-                styles.confirmLabel,
-                isCompactHeight && styles.compactConfirmLabel,
-              ]}
-            >
-              {t('language.confirm')}
-            </Text>
-          </Pressable>
+            labelStyle={[
+              styles.confirmLabel,
+              isCompactHeight && styles.compactConfirmLabel,
+            ]}
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -162,6 +156,7 @@ function LanguageOption({
 
       <Text
         adjustsFontSizeToFit
+        minimumFontScale={0.8}
         numberOfLines={1}
         style={[styles.optionLabel, compact && styles.compactOptionLabel]}
       >
@@ -207,14 +202,14 @@ const styles = StyleSheet.create({
   title: {
     color: colors.white,
     fontFamily: 'DynaPuff',
+    fontSize: 30,
     fontWeight: '700',
-    fontSize: 34,
     lineHeight: 42,
   },
 
   compactTitle: {
-    fontSize: 31,
-    lineHeight: 37,
+    fontSize: 27,
+    lineHeight: 35,
   },
 
   subtitle: {
@@ -247,8 +242,8 @@ const styles = StyleSheet.create({
   },
 
   option: {
-    minHeight: 94,
     width: '100%',
+    minHeight: 94,
 
     flexDirection: 'row',
     alignItems: 'center',
@@ -312,60 +307,40 @@ const styles = StyleSheet.create({
     marginLeft: spacing.lg,
 
     color: colors.white,
-    fontFamily: roundedFont,
+    fontFamily: 'DynaPuff',
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '500',
   },
 
   compactOptionLabel: {
     fontSize: 23,
   },
 
+  /*
+   * LovabiesButton controls:
+   * - button height
+   * - pill shape
+   * - background colour
+   * - lower shadow layer
+   * - pressed animation
+   *
+   * This screen only controls spacing.
+   */
   confirmButton: {
-    minHeight: 66,
-    width: '100%',
-
-    alignItems: 'center',
-    justifyContent: 'center',
-
     marginTop: spacing.xxl,
-
-    borderRadius: radius.pill,
-    backgroundColor: colors.lovabiesButton,
-
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-
-    shadowColor: colors.lovabiesButtonShadow,
-    shadowOffset: {
-      width: 0,
-      height: 7,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-
-    elevation: 8,
   },
 
   compactConfirmButton: {
-    minHeight: 54,
     marginTop: spacing.lg,
   },
 
-  confirmButtonPressed: {
-    opacity: 0.9,
-    transform: [{ translateY: 3 }],
-  },
-
   confirmLabel: {
-    color: colors.white,
-    fontFamily: roundedFont,
-    fontSize: 20,
-    fontWeight: '900',
-    textAlign: 'center',
+    fontFamily: 'roundedFont',
+    fontSize: 22,
+    fontWeight: '500',
   },
 
   compactConfirmLabel: {
-    fontSize: 18,
+    fontSize: 19,
   },
 });

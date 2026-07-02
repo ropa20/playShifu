@@ -379,6 +379,7 @@ const styles = StyleSheet.create({
     lineHeight: 31,
     fontFamily: 'DynaPuff',
     fontWeight: '700',
+    fontSize: 28,
   },
 
   shortTabletGreeting: {

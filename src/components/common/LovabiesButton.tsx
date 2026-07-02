@@ -5,10 +5,9 @@ import {
   StyleSheet,
   Text,
   TextStyle,
+  View,
   ViewStyle,
 } from 'react-native';
-
-import { colors, radius, spacing } from '../../theme';
 
 type LovabiesButtonProps = {
   label: string;
@@ -17,6 +16,21 @@ type LovabiesButtonProps = {
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
+};
+
+const BUTTON_HEIGHT = 80;
+const FACE_HEIGHT = 70;
+const SHADOW_OFFSET = 10;
+
+const buttonColors = {
+  darkFace: '#302C62',
+  darkShadow: '#141043',
+
+  lightFace: '#FFFFFF',
+  lightShadow: '#B3ACDA',
+
+  darkText: '#FFFFFF',
+  lightText: '#302C62',
 };
 
 export function LovabiesButton({
@@ -30,85 +44,123 @@ export function LovabiesButton({
   const isLight = variant === 'light';
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.button,
-        isLight ? styles.lightButton : styles.darkButton,
-        pressed && !disabled && styles.pressed,
-        disabled && styles.disabled,
-        style,
-      ]}
-    >
-      <Text
-        adjustsFontSizeToFit
-        numberOfLines={1}
-        style={[
-          styles.label,
-          isLight ? styles.lightLabel : styles.darkLabel,
-          labelStyle,
-        ]}
+    <View style={[style, styles.wrapper, disabled && styles.disabled]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={onPress}
+        style={styles.pressable}
       >
-        {label}
-      </Text>
-    </Pressable>
+        {({ pressed }) => (
+          <>
+            {/* Solid lower layer */}
+            <View
+              pointerEvents="none"
+              style={[
+                styles.shadowLayer,
+                {
+                  backgroundColor: isLight
+                    ? buttonColors.lightShadow
+                    : buttonColors.darkShadow,
+                },
+              ]}
+            />
+
+            {/* Main button face */}
+            <View
+              style={[
+                styles.buttonFace,
+                {
+                  backgroundColor: isLight
+                    ? buttonColors.lightFace
+                    : buttonColors.darkFace,
+                },
+                pressed && !disabled && styles.pressedFace,
+              ]}
+            >
+              <Text
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
+                numberOfLines={1}
+                style={[
+                  labelStyle,
+                  styles.label,
+                  {
+                    color: isLight
+                      ? buttonColors.lightText
+                      : buttonColors.darkText,
+                  },
+                ]}
+              >
+                {label}
+              </Text>
+            </View>
+          </>
+        )}
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    minHeight: 62,
+  wrapper: {
     width: '100%',
+    height: BUTTON_HEIGHT,
+    minHeight: BUTTON_HEIGHT,
+
+    backgroundColor: 'transparent',
+  },
+
+  pressable: {
+    position: 'relative',
+
+    width: '100%',
+    height: BUTTON_HEIGHT,
+  },
+
+  shadowLayer: {
+    position: 'absolute',
+
+    top: SHADOW_OFFSET,
+    right: 0,
+    left: 0,
+
+    height: FACE_HEIGHT,
+
+    borderRadius: 999,
+  },
+
+  buttonFace: {
+    position: 'absolute',
+
+    top: 0,
+    right: 0,
+    left: 0,
+
+    height: FACE_HEIGHT,
 
     alignItems: 'center',
     justifyContent: 'center',
 
-    borderRadius: radius.pill,
+    borderRadius: 999,
 
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-
-    shadowColor: colors.lovabiesButtonShadow,
-    shadowOffset: {
-      width: 0,
-      height: 7,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-
-    elevation: 8,
+    paddingHorizontal: 28,
   },
 
-  darkButton: {
-    backgroundColor: colors.lovabiesButton,
-  },
-
-  lightButton: {
-    backgroundColor: colors.white,
+  pressedFace: {
+    transform: [{ translateY: 5 }],
   },
 
   label: {
     fontFamily: 'sans-serif-rounded',
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '500',
+    lineHeight: 28,
+
     textAlign: 'center',
-  },
-
-  darkLabel: {
-    color: colors.white,
-  },
-
-  lightLabel: {
-    color: colors.lovabiesButton,
-  },
-
-  pressed: {
-    opacity: 0.9,
-    transform: [{ translateY: 3 }],
+    includeFontPadding: false,
   },
 
   disabled: {
