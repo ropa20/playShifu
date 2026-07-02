@@ -21,12 +21,11 @@ const en = {
   },
 
   plush: {
-    title: 'Choose your plush',
-    subtitle: 'Select the Lovabies toy you have.',
-    toy1: 'Cuffy',
-    toy2: 'ZeeZee',
-    toy3: 'Mimi',
-    continue: 'Continue',
+    title: 'Select your Lovabies',
+    subtitle: 'Pick the plush you want to get for your loved one',
+    zeezee: 'ZeeZee',
+    cuffy: 'Cuffy',
+    next: 'Next',
   },
 
   benefits: {
