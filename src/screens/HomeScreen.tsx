@@ -126,13 +126,6 @@ export function HomeScreen(_: Props) {
           </View>
 
           {isTablet ? (
-            /*
-             * Tablet featured section:
-             *
-             * ┌───────────────┬───────────────┐
-             * │     Image     │ Text + button │
-             * └───────────────┴───────────────┘
-             */
             <View
               style={[
                 styles.tabletFeaturedCard,
@@ -319,10 +312,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
 
-  /*
-   * No maxWidth on tablet.
-   * This removes the large empty spaces on the left and right.
-   */
   tabletPage: {
     width: '100%',
     paddingHorizontal: 24,
@@ -402,10 +391,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 
-  /*
-   * MOBILE FEATURED CARD
-   */
-
   mobileFeaturedCard: {
     width: '100%',
     overflow: 'hidden',
@@ -440,12 +425,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 24,
   },
-
-  /*
-   * TABLET FEATURED CARD
-   *
-   * Both columns use flexBasis: 50%, so they are exactly 1:1.
-   */
 
   tabletFeaturedCard: {
     width: '100%',
@@ -555,6 +534,8 @@ const styles = StyleSheet.create({
 
   playButtonLabel: {
     fontSize: 18,
+    fontFamily: 'DynaPuff',
+    fontWeight: '500',
   },
 
   shortTabletPlayButtonLabel: {

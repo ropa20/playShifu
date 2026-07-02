@@ -318,6 +318,7 @@ const styles = StyleSheet.create({
   nextButtonLabel: {
     fontSize: 22,
     fontWeight: '900',
+    fontFamily: 'DynaPuff',
   },
 
   compactNextButtonLabel: {

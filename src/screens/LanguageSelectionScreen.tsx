@@ -316,16 +316,6 @@ const styles = StyleSheet.create({
     fontSize: 23,
   },
 
-  /*
-   * LovabiesButton controls:
-   * - button height
-   * - pill shape
-   * - background colour
-   * - lower shadow layer
-   * - pressed animation
-   *
-   * This screen only controls spacing.
-   */
   confirmButton: {
     marginTop: spacing.xxl,
   },
@@ -335,7 +325,7 @@ const styles = StyleSheet.create({
   },
 
   confirmLabel: {
-    fontFamily: 'roundedFont',
+    fontFamily: 'DynaPuff',
     fontSize: 22,
     fontWeight: '500',
   },

@@ -24,13 +24,6 @@ export function WelcomeScreen({ navigation }: Props) {
 
   const isLandscape = width > height;
 
-  /*
-   * In portrait, the content receives half the screen height.
-   * In landscape, it receives the full screen height.
-   *
-   * We use the actual content-panel height to decide whether
-   * compact spacing and typography are needed.
-   */
   const contentPanelHeight = isLandscape ? height : height / 2;
   const isCompactPanel = contentPanelHeight < 430;
 

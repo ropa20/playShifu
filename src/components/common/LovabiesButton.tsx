@@ -18,8 +18,8 @@ type LovabiesButtonProps = {
   labelStyle?: StyleProp<TextStyle>;
 };
 
-const BUTTON_HEIGHT = 80;
-const FACE_HEIGHT = 70;
+const BUTTON_HEIGHT = 60;
+const FACE_HEIGHT = 50;
 const SHADOW_OFFSET = 10;
 
 const buttonColors = {
@@ -85,13 +85,13 @@ export function LovabiesButton({
                 minimumFontScale={0.8}
                 numberOfLines={1}
                 style={[
-                  labelStyle,
                   styles.label,
                   {
                     color: isLight
                       ? buttonColors.lightText
                       : buttonColors.darkText,
                   },
+                  labelStyle,
                 ]}
               >
                 {label}
