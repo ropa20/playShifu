@@ -60,17 +60,24 @@ const en = {
   },
 
   home: {
-    title: 'You’re all set!',
-    subtitle: 'Welcome to your Lovabies home.',
+    greeting: 'Hello, little explorer!',
+    subtitle: 'What would you like to discover today?',
+
+    featuredTitle: 'Continue your adventure',
+    featuredDescription: 'Join Cuffy and ZeeZee for a magical bedtime story.',
+    play: 'Play story',
 
     stories: 'Stories',
-    storiesDescription: 'Explore calming and playful audio stories.',
+    storiesDescription: 'Explore magical audio adventures.',
+
+    songs: 'Songs',
+    songsDescription: 'Sing and dance along.',
 
     routines: 'Routines',
-    routinesDescription: 'Build simple and positive daily habits.',
+    routinesDescription: 'Make daily moments more fun.',
 
-    toyProfile: 'Toy profile',
-    toyProfileDescription: 'Manage your selected Lovabies plush.',
+    parents: 'Parents',
+    parentsDescription: 'Manage settings and your toy.',
   },
 };
 
