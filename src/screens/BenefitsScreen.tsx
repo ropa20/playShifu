@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { ComparisonTable } from '../components/benefits/ComparisonTable';
@@ -28,10 +27,6 @@ export function BenefitsScreen({ navigation }: Props) {
   const isLandscape = width > height;
   const isTablet = Math.min(width, height) >= 600;
 
-  /*
-   * The source image is very wide, but the reference design displays it
-   * inside a taller full-width hero area using cover.
-   */
   const heroHeight = isLandscape
     ? Math.min(height * 0.72, 420)
     : Math.min(width * 0.88, isTablet ? 560 : 380);
@@ -41,10 +36,12 @@ export function BenefitsScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.safeArea}>
+    <View style={styles.root}>
       <StatusBar hidden />
 
       <ScrollView
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -109,18 +106,20 @@ export function BenefitsScreen({ navigation }: Props) {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  root: {
     flex: 1,
+    width: '100%',
     backgroundColor: colors.lovabiesPurple,
   },
 
   scrollContent: {
     flexGrow: 1,
+    width: '100%',
     backgroundColor: colors.lovabiesPurple,
   },
 
@@ -148,7 +147,9 @@ const styles = StyleSheet.create({
   },
 
   tabletContent: {
+    width: '100%',
     maxWidth: 920,
+
     paddingHorizontal: 56,
     paddingTop: 28,
     paddingBottom: 64,
@@ -161,13 +162,12 @@ const styles = StyleSheet.create({
 
   title: {
     maxWidth: 360,
-
-    color: colors.white,
-    fontFamily: 'sans-serif-rounded',
-    fontSize: 36,
-    fontWeight: '900',
-    lineHeight: 40,
     textAlign: 'center',
+    color: colors.white,
+    fontFamily: 'DynaPuff',
+    fontWeight: '700',
+    fontSize: 34,
+    lineHeight: 42,
   },
 
   tabletTitle: {

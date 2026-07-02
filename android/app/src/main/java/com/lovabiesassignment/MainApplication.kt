@@ -1,5 +1,7 @@
 package com.lovabiesassignment
 
+import com.facebook.react.common.assets.ReactFontManager
+
 import android.app.Application
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
@@ -22,6 +24,7 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    ReactFontManager.getInstance().addCustomFont(this, "DynaPuff", R.font.dynapuff)
     loadReactNative(this)
   }
 }

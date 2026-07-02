@@ -9,9 +9,9 @@ import {
   View,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { ScreenContainer } from '../components/common/ScreenContainer';
 import i18n from '../localization/i18n';
 import { RootStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -29,8 +29,8 @@ export function LanguageSelectionScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { width, height } = useWindowDimensions();
 
-  const isLandscape = width > height;
   const isTablet = Math.min(width, height) >= 600;
+  const isCompactHeight = height < 700;
 
   const initialLanguage: SupportedLanguage = i18n.language.startsWith('pl')
     ? 'pl'
@@ -49,114 +49,122 @@ export function LanguageSelectionScreen({ navigation }: Props) {
   };
 
   return (
-    <>
+    <SafeAreaView
+      edges={['top', 'right', 'bottom', 'left']}
+      style={styles.safeArea}
+    >
       <StatusBar
         barStyle="light-content"
         backgroundColor={colors.lovabiesPurple}
       />
 
-      <ScreenContainer backgroundColor={colors.lovabiesPurple}>
-        <View
-          style={[
-            styles.content,
-            isTablet && styles.tabletContent,
-            isLandscape && styles.landscapeContent,
-          ]}
-        >
-          <View
-            style={[
-              styles.headingSection,
-              isLandscape && styles.landscapeHeadingSection,
-            ]}
-          >
+      <View style={[styles.page, isCompactHeight && styles.compactPage]}>
+        <View style={[styles.content, isTablet && styles.tabletContent]}>
+          <View style={styles.headingSection}>
             <Text
               adjustsFontSizeToFit
               numberOfLines={2}
-              style={[styles.title, isTablet && styles.tabletTitle]}
+              style={[styles.title, isCompactHeight && styles.compactTitle]}
             >
               {t('language.title')}
             </Text>
 
-            <Text style={[styles.subtitle, isTablet && styles.tabletSubtitle]}>
+            <Text
+              style={[
+                styles.subtitle,
+                isCompactHeight && styles.compactSubtitle,
+              ]}
+            >
               {t('language.subtitle')}
             </Text>
           </View>
 
           <View
-            style={[
-              styles.controlsSection,
-              isLandscape && styles.landscapeControlsSection,
+            style={[styles.options, isCompactHeight && styles.compactOptions]}
+          >
+            <LanguageOption
+              label={t('language.english')}
+              selected={selectedLanguage === 'en'}
+              compact={isCompactHeight}
+              onPress={() => {
+                void selectLanguage('en');
+              }}
+            />
+
+            <LanguageOption
+              label={t('language.polish')}
+              selected={selectedLanguage === 'pl'}
+              compact={isCompactHeight}
+              onPress={() => {
+                void selectLanguage('pl');
+              }}
+            />
+          </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('language.confirm')}
+            onPress={confirmLanguage}
+            style={({ pressed }) => [
+              styles.confirmButton,
+              isCompactHeight && styles.compactConfirmButton,
+              pressed && styles.confirmButtonPressed,
             ]}
           >
-            <View
-              style={[styles.options, isLandscape && styles.landscapeOptions]}
-            >
-              <LanguageOption
-                label={t('language.english')}
-                selected={selectedLanguage === 'en'}
-                onPress={() => {
-                  void selectLanguage('en');
-                }}
-              />
-
-              <LanguageOption
-                label={t('language.polish')}
-                selected={selectedLanguage === 'pl'}
-                onPress={() => {
-                  void selectLanguage('pl');
-                }}
-              />
-            </View>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('language.confirm')}
-              onPress={confirmLanguage}
-              style={({ pressed }) => [
-                styles.confirmButton,
-                isTablet && styles.tabletConfirmButton,
-                pressed && styles.confirmButtonPressed,
+            <Text
+              adjustsFontSizeToFit
+              numberOfLines={1}
+              style={[
+                styles.confirmLabel,
+                isCompactHeight && styles.compactConfirmLabel,
               ]}
             >
-              <Text
-                style={[
-                  styles.confirmLabel,
-                  isTablet && styles.tabletConfirmLabel,
-                ]}
-              >
-                {t('language.confirm')}
-              </Text>
-            </Pressable>
-          </View>
+              {t('language.confirm')}
+            </Text>
+          </Pressable>
         </View>
-      </ScreenContainer>
-    </>
+      </View>
+    </SafeAreaView>
   );
 }
 
 type LanguageOptionProps = {
   label: string;
   selected: boolean;
+  compact: boolean;
   onPress: () => void;
 };
 
-function LanguageOption({ label, selected, onPress }: LanguageOptionProps) {
+function LanguageOption({
+  label,
+  selected,
+  compact,
+  onPress,
+}: LanguageOptionProps) {
   return (
     <Pressable
       accessibilityRole="radio"
+      accessibilityLabel={label}
       accessibilityState={{ checked: selected }}
       onPress={onPress}
       style={({ pressed }) => [
         styles.option,
+        compact && styles.compactOption,
         selected && styles.selectedOption,
         pressed && styles.pressedOption,
       ]}
     >
-      <View style={styles.radioOuter}>
-        {selected ? <View style={styles.radioDot} /> : null}
+      <View style={[styles.radioOuter, compact && styles.compactRadioOuter]}>
+        {selected ? (
+          <View style={[styles.radioDot, compact && styles.compactRadioDot]} />
+        ) : null}
       </View>
 
-      <Text adjustsFontSizeToFit numberOfLines={1} style={styles.optionLabel}>
+      <Text
+        adjustsFontSizeToFit
+        numberOfLines={1}
+        style={[styles.optionLabel, compact && styles.compactOptionLabel]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -164,6 +172,24 @@ function LanguageOption({ label, selected, onPress }: LanguageOptionProps) {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.lovabiesPurple,
+  },
+
+  page: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
+  },
+
+  compactPage: {
+    paddingVertical: spacing.md,
+  },
+
   content: {
     width: '100%',
     maxWidth: 620,
@@ -171,48 +197,31 @@ const styles = StyleSheet.create({
   },
 
   tabletContent: {
-    maxWidth: 760,
-  },
-
-  landscapeContent: {
-    maxWidth: 980,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xxl,
+    maxWidth: 680,
   },
 
   headingSection: {
     width: '100%',
   },
 
-  landscapeHeadingSection: {
-    flex: 0.85,
-  },
-
-  controlsSection: {
-    width: '100%',
-  },
-
-  landscapeControlsSection: {
-    flex: 1.15,
-  },
-
   title: {
     color: colors.white,
-    fontFamily: roundedFont,
-    fontSize: 39,
-    fontWeight: '900',
-    lineHeight: 47,
+    fontFamily: 'DynaPuff',
+    fontWeight: '700',
+    fontSize: 34,
+    lineHeight: 42,
   },
 
-  tabletTitle: {
-    fontSize: 50,
-    lineHeight: 59,
+  compactTitle: {
+    fontSize: 31,
+    lineHeight: 37,
   },
 
   subtitle: {
+    width: '100%',
     maxWidth: 520,
     marginTop: spacing.md,
+
     color: colors.white,
     fontFamily: roundedFont,
     fontSize: 20,
@@ -220,9 +229,10 @@ const styles = StyleSheet.create({
     lineHeight: 30,
   },
 
-  tabletSubtitle: {
-    fontSize: 25,
-    lineHeight: 36,
+  compactSubtitle: {
+    marginTop: spacing.sm,
+    fontSize: 17,
+    lineHeight: 23,
   },
 
   options: {
@@ -231,13 +241,15 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
 
-  landscapeOptions: {
-    marginTop: 0,
+  compactOptions: {
+    marginTop: spacing.lg,
+    gap: spacing.md,
   },
 
   option: {
     minHeight: 94,
     width: '100%',
+
     flexDirection: 'row',
     alignItems: 'center',
 
@@ -249,6 +261,11 @@ const styles = StyleSheet.create({
 
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
+  },
+
+  compactOption: {
+    minHeight: 72,
+    paddingVertical: spacing.sm,
   },
 
   selectedOption: {
@@ -272,12 +289,22 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
 
+  compactRadioOuter: {
+    width: 28,
+    height: 28,
+  },
+
   radioDot: {
     width: 20,
     height: 20,
 
     borderRadius: radius.pill,
     backgroundColor: colors.white,
+  },
+
+  compactRadioDot: {
+    width: 17,
+    height: 17,
   },
 
   optionLabel: {
@@ -288,6 +315,10 @@ const styles = StyleSheet.create({
     fontFamily: roundedFont,
     fontSize: 28,
     fontWeight: '900',
+  },
+
+  compactOptionLabel: {
+    fontSize: 23,
   },
 
   confirmButton: {
@@ -316,17 +347,14 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 
-  tabletConfirmButton: {
-    minHeight: 78,
+  compactConfirmButton: {
+    minHeight: 54,
+    marginTop: spacing.lg,
   },
 
   confirmButtonPressed: {
     opacity: 0.9,
-    transform: [
-      {
-        translateY: 3,
-      },
-    ],
+    transform: [{ translateY: 3 }],
   },
 
   confirmLabel: {
@@ -337,7 +365,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  tabletConfirmLabel: {
-    fontSize: 25,
+  compactConfirmLabel: {
+    fontSize: 18,
   },
 });

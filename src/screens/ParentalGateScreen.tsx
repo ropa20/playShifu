@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -13,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import { LovabiesButton } from '../components/common/LovabiesButton';
 import { RootStackParamList } from '../navigation/types';
-import { colors, spacing } from '../theme';
+import { colors } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParentalGate'>;
 
@@ -49,76 +52,108 @@ export function ParentalGateScreen({ navigation }: Props) {
         backgroundColor={colors.lovabiesPurple}
       />
 
-      <View
-        style={[
-          styles.page,
-          isTablet && styles.tabletPage,
-          isCompactHeight && styles.compactPage,
-        ]}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.keyboardView}
       >
-        <Text style={[styles.title, isTablet && styles.tabletTitle]}>
-          {t('parental.title')}
-        </Text>
-
-        <Text
-          style={[
-            styles.subtitle,
-            isTablet && styles.tabletSubtitle,
-            isCompactHeight && styles.compactSubtitle,
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              minHeight: height,
+            },
           ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {t('parental.subtitle')}
-        </Text>
-
-        <Text style={[styles.equation, isTablet && styles.tabletEquation]}>
-          {t('parental.question')}
-        </Text>
-
-        <View style={styles.inputWrapper}>
-          <TextInput
-            accessibilityLabel={t('parental.placeholder')}
-            keyboardType="number-pad"
-            multiline
-            numberOfLines={5}
-            onChangeText={value => {
-              setAnswer(value);
-              if (hasError) {
-                setHasError(false);
-              }
-            }}
-            onSubmitEditing={handleNext}
-            placeholder={t('parental.placeholder')}
-            placeholderTextColor="#8E8E8E"
+          <View
             style={[
-              styles.input,
-              isTablet && styles.tabletInput,
-              hasError && styles.inputError,
+              styles.page,
+              isTablet && styles.tabletPage,
+              isCompactHeight && styles.compactPage,
             ]}
-            textAlignVertical="top"
-            value={answer}
-          />
+          >
+            <Text
+              adjustsFontSizeToFit
+              numberOfLines={1}
+              style={[styles.title, isCompactHeight && styles.compactTitle]}
+            >
+              {t('parental.title')}
+            </Text>
 
-          {hasError ? (
-            <Text style={styles.errorText}>{t('parental.error')}</Text>
-          ) : null}
-        </View>
+            <Text
+              adjustsFontSizeToFit
+              numberOfLines={2}
+              style={[
+                styles.subtitle,
+                isCompactHeight && styles.compactSubtitle,
+              ]}
+            >
+              {t('parental.subtitle')}
+            </Text>
 
-        <LovabiesButton
-          label={t('parental.next')}
-          onPress={handleNext}
-          style={[
-            styles.nextButton,
-            isTablet && styles.tabletNextButton,
-            isCompactHeight && styles.compactNextButton,
-          ]}
-          labelStyle={[
-            styles.nextButtonLabel,
-            isTablet && styles.tabletNextButtonLabel,
-          ]}
-        />
+            <Text
+              adjustsFontSizeToFit
+              numberOfLines={1}
+              style={[
+                styles.equation,
+                isCompactHeight && styles.compactEquation,
+              ]}
+            >
+              {t('parental.question')}
+            </Text>
 
-        <View style={styles.bottomSpacer} />
-      </View>
+            <View
+              style={[
+                styles.inputWrapper,
+                isCompactHeight && styles.compactInputWrapper,
+              ]}
+            >
+              <TextInput
+                accessibilityLabel={t('parental.placeholder')}
+                keyboardType="number-pad"
+                maxLength={3}
+                onChangeText={value => {
+                  setAnswer(value);
+
+                  if (hasError) {
+                    setHasError(false);
+                  }
+                }}
+                onSubmitEditing={handleNext}
+                placeholder={t('parental.placeholder')}
+                placeholderTextColor="#8E8E8E"
+                returnKeyType="done"
+                style={[
+                  styles.input,
+                  isTablet && styles.tabletInput,
+                  isCompactHeight && styles.compactInput,
+                  hasError && styles.inputError,
+                ]}
+                textAlignVertical="center"
+                value={answer}
+              />
+
+              {hasError ? (
+                <Text style={styles.errorText}>{t('parental.error')}</Text>
+              ) : null}
+            </View>
+
+            <LovabiesButton
+              label={t('parental.next')}
+              onPress={handleNext}
+              style={[
+                styles.nextButton,
+                isCompactHeight && styles.compactNextButton,
+              ]}
+              labelStyle={[
+                styles.nextButtonLabel,
+                isCompactHeight && styles.compactNextButtonLabel,
+              ]}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -129,57 +164,55 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lovabiesPurple,
   },
 
-  page: {
+  keyboardView: {
     flex: 1,
-    width: '100%',
-    maxWidth: 760,
-    alignSelf: 'center',
-    paddingHorizontal: 28,
-    paddingTop: 18,
-    paddingBottom: 28,
   },
 
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    backgroundColor: colors.lovabiesPurple,
+  },
+
+  page: {
+    width: '100%',
+    maxWidth: 620,
+    alignSelf: 'center',
+
+    paddingHorizontal: 28,
+    paddingVertical: 28,
+  },
+
+  /*
+   * Tablet keeps the same mobile sizing.
+   * Only the maximum content width changes slightly.
+   */
   tabletPage: {
-    maxWidth: 920,
-    paddingHorizontal: 48,
-    paddingTop: 28,
+    maxWidth: 700,
+    paddingHorizontal: 36,
   },
 
   compactPage: {
-    paddingTop: 12,
-    paddingBottom: 20,
-  },
-
-  screenLabel: {
-    color: colors.white,
-    fontFamily: 'sans-serif-rounded',
-    fontSize: 18,
-    fontWeight: '600',
-    lineHeight: 24,
-  },
-
-  tabletScreenLabel: {
-    fontSize: 28,
-    lineHeight: 34,
+    paddingVertical: 16,
   },
 
   title: {
-    marginTop: 42,
     color: colors.white,
-    fontFamily: 'sans-serif-rounded',
+    fontFamily: 'DynaPuff',
+    fontWeight: '700',
     fontSize: 34,
-    fontWeight: '900',
-    lineHeight: 40,
+    lineHeight: 42,
   },
 
-  tabletTitle: {
-    fontSize: 50,
-    lineHeight: 58,
+  compactTitle: {
+    fontSize: 29,
+    lineHeight: 35,
   },
 
   subtitle: {
-    maxWidth: 420,
-    marginTop: 28,
+    maxWidth: 480,
+    marginTop: 24,
+
     color: colors.white,
     fontFamily: 'sans-serif-rounded',
     fontSize: 19,
@@ -188,20 +221,15 @@ const styles = StyleSheet.create({
   },
 
   compactSubtitle: {
-    marginTop: 20,
-    fontSize: 17,
-    lineHeight: 24,
-  },
-
-  tabletSubtitle: {
-    maxWidth: 620,
-    fontSize: 28,
-    lineHeight: 38,
+    marginTop: 14,
+    fontSize: 16,
+    lineHeight: 22,
   },
 
   equation: {
-    marginTop: 40,
+    marginTop: 36,
     marginLeft: 24,
+
     color: colors.yellow,
     fontFamily: 'sans-serif-rounded',
     fontSize: 40,
@@ -209,25 +237,37 @@ const styles = StyleSheet.create({
     lineHeight: 48,
   },
 
-  tabletEquation: {
-    marginTop: 54,
-    fontSize: 58,
-    lineHeight: 68,
+  compactEquation: {
+    marginTop: 22,
+    fontSize: 34,
+    lineHeight: 41,
   },
 
   inputWrapper: {
-    marginTop: 34,
+    width: '100%',
+    marginTop: 30,
   },
 
+  compactInputWrapper: {
+    marginTop: 20,
+  },
+
+  /*
+   * This is deliberately smaller than the old 170–230px box.
+   * It still resembles the reference but allows the full page to fit.
+   */
   input: {
-    minHeight: 170,
+    height: 120,
     width: '100%',
+
     borderRadius: 16,
     backgroundColor: colors.white,
+
     paddingHorizontal: 22,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingVertical: 16,
+
     color: colors.text,
+    fontFamily: 'sans-serif-rounded',
     fontSize: 22,
 
     shadowColor: colors.lovabiesButtonShadow,
@@ -237,16 +277,18 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 7,
+
     elevation: 6,
   },
 
   tabletInput: {
-    minHeight: 230,
-    borderRadius: 18,
-    paddingHorizontal: 28,
-    paddingTop: 24,
-    paddingBottom: 24,
-    fontSize: 28,
+    height: 125,
+  },
+
+  compactInput: {
+    height: 90,
+    paddingVertical: 12,
+    fontSize: 19,
   },
 
   inputError: {
@@ -255,25 +297,22 @@ const styles = StyleSheet.create({
   },
 
   errorText: {
-    marginTop: 10,
+    marginTop: 8,
+
     color: '#FFD9D6',
+    fontFamily: 'sans-serif-rounded',
     fontSize: 14,
     fontWeight: '600',
   },
 
   nextButton: {
     minHeight: 66,
-    marginTop: 38,
+    marginTop: 34,
   },
 
   compactNextButton: {
-    marginTop: 28,
-    minHeight: 60,
-  },
-
-  tabletNextButton: {
-    minHeight: 82,
-    marginTop: 48,
+    minHeight: 54,
+    marginTop: 22,
   },
 
   nextButtonLabel: {
@@ -281,11 +320,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  tabletNextButtonLabel: {
-    fontSize: 30,
-  },
-
-  bottomSpacer: {
-    flex: 1,
+  compactNextButtonLabel: {
+    fontSize: 18,
   },
 });

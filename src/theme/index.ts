@@ -40,3 +40,6 @@ export const radius = {
   lg: 24,
   pill: 999,
 } as const;
+export const fonts = {
+  heading: 'DynaPuff',
+};

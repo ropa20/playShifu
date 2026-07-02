@@ -8,7 +8,6 @@ import {
   View,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { LovabiesButton } from '../components/common/LovabiesButton';
@@ -24,20 +23,22 @@ export function WelcomeScreen({ navigation }: Props) {
   const { width, height } = useWindowDimensions();
 
   const isLandscape = width > height;
-  const isTablet = Math.min(width, height) >= 600;
-  const isCompactHeight = height < 700;
+
+  /*
+   * In portrait, the content receives half the screen height.
+   * In landscape, it receives the full screen height.
+   *
+   * We use the actual content-panel height to decide whether
+   * compact spacing and typography are needed.
+   */
+  const contentPanelHeight = isLandscape ? height : height / 2;
+  const isCompactPanel = contentPanelHeight < 430;
 
   return (
-    <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <StatusBar hidden />
-
       <View style={[styles.page, isLandscape && styles.landscapePage]}>
-        <View
-          style={[
-            styles.heroSection,
-            isLandscape && styles.landscapeHeroSection,
-          ]}
-        >
+        <View style={styles.heroSection}>
           <Image
             accessibilityLabel="Lovabies bear and unicorn toys"
             accessibilityIgnoresInvertColors
@@ -47,39 +48,30 @@ export function WelcomeScreen({ navigation }: Props) {
           />
         </View>
 
-        <View
-          style={[
-            styles.contentSection,
-            isLandscape && styles.landscapeContentSection,
-          ]}
-        >
+        <View style={styles.contentSection}>
           <View
             style={[
               styles.contentInner,
-              isTablet && styles.tabletContentInner,
-              isLandscape && styles.landscapeContentInner,
+              isCompactPanel && styles.compactContentInner,
             ]}
           >
             <View style={styles.textSection}>
               <Text
                 adjustsFontSizeToFit
+                minimumFontScale={0.75}
                 numberOfLines={1}
-                style={[
-                  styles.title,
-                  isTablet && styles.tabletTitle,
-                  isCompactHeight && styles.compactTitle,
-                ]}
+                style={[styles.title, isCompactPanel && styles.compactTitle]}
               >
                 {t('welcome.title')}
               </Text>
 
               <Text
                 adjustsFontSizeToFit
+                minimumFontScale={0.75}
                 numberOfLines={2}
                 style={[
                   styles.subtitle,
-                  isTablet && styles.tabletSubtitle,
-                  isCompactHeight && styles.compactSubtitle,
+                  isCompactPanel && styles.compactSubtitle,
                 ]}
               >
                 {t('welcome.subtitle')}
@@ -87,37 +79,37 @@ export function WelcomeScreen({ navigation }: Props) {
             </View>
 
             <View
-              style={[styles.actions, isCompactHeight && styles.compactActions]}
+              style={[styles.actions, isCompactPanel && styles.compactActions]}
             >
               <LovabiesButton
                 label={t('welcome.yes')}
-                style={[styles.cta, isCompactHeight && styles.compactCta]}
-                labelStyle={[
-                  styles.ctaLabel,
-                  isCompactHeight && styles.compactCtaLabel,
-                ]}
                 onPress={() => {
                   navigation.navigate('PlushSelection');
                 }}
+                style={[styles.cta, isCompactPanel && styles.compactCta]}
+                labelStyle={[
+                  styles.ctaLabel,
+                  isCompactPanel && styles.compactCtaLabel,
+                ]}
               />
 
               <LovabiesButton
                 label={t('welcome.no')}
                 variant="light"
-                style={[styles.cta, isCompactHeight && styles.compactCta]}
-                labelStyle={[
-                  styles.ctaLabel,
-                  isCompactHeight && styles.compactCtaLabel,
-                ]}
                 onPress={() => {
                   navigation.navigate('Benefits');
                 }}
+                style={[styles.cta, isCompactPanel && styles.compactCta]}
+                labelStyle={[
+                  styles.ctaLabel,
+                  isCompactPanel && styles.compactCtaLabel,
+                ]}
               />
             </View>
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -137,15 +129,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
 
+  /*
+   * Both main sections use flex: 1.
+   * This creates an exact 1:1 ratio in portrait and landscape.
+   */
   heroSection: {
     flex: 1,
-    width: '100%',
     overflow: 'hidden',
     backgroundColor: colors.lovabiesButton,
-  },
-
-  landscapeHeroSection: {
-    width: '50%',
   },
 
   heroImage: {
@@ -155,32 +146,25 @@ const styles = StyleSheet.create({
 
   contentSection: {
     flex: 1,
-    width: '100%',
     backgroundColor: colors.lovabiesPurple,
   },
 
-  landscapeContentSection: {
-    width: '50%',
-  },
-
+  /*
+   * No maxWidth is used here.
+   * The content fills the full available half of the screen
+   * on phones and tablets.
+   */
   contentInner: {
     flex: 1,
     width: '100%',
-    maxWidth: 680,
-    alignSelf: 'center',
     justifyContent: 'space-evenly',
 
     paddingHorizontal: 30,
     paddingVertical: 24,
   },
 
-  tabletContentInner: {
-    maxWidth: 820,
-    paddingHorizontal: spacing.xxl,
-  },
-
-  landscapeContentInner: {
-    paddingHorizontal: spacing.xl,
+  compactContentInner: {
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
 
@@ -191,21 +175,16 @@ const styles = StyleSheet.create({
 
   title: {
     color: colors.white,
-    fontFamily: 'sans-serif-rounded',
-    fontSize: 40,
-    fontWeight: '900',
-    lineHeight: 48,
     textAlign: 'center',
+    fontFamily: 'DynaPuff',
+    fontWeight: '700',
+    fontSize: 34,
+    lineHeight: 42,
   },
 
   compactTitle: {
     fontSize: 32,
     lineHeight: 38,
-  },
-
-  tabletTitle: {
-    fontSize: 50,
-    lineHeight: 58,
   },
 
   subtitle: {
@@ -224,11 +203,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     fontSize: 17,
     lineHeight: 23,
-  },
-
-  tabletSubtitle: {
-    fontSize: 26,
-    lineHeight: 36,
   },
 
   actions: {
