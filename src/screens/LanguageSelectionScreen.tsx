@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Platform,
   Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -21,28 +22,63 @@ type Props = NativeStackScreenProps<RootStackParamList, 'LanguageSelection'>;
 
 type SupportedLanguage = 'en' | 'pl';
 
+type LanguageOptionProps = {
+  label: string;
+  selected: boolean;
+  compact: boolean;
+  onPress: () => void;
+};
+
+const LANGUAGE_OPTIONS = [
+  {
+    code: 'en',
+    translationKey: 'language.english',
+  },
+  {
+    code: 'pl',
+    translationKey: 'language.polish',
+  },
+] as const;
+
 const roundedFont = Platform.select({
   android: 'sans-serif-rounded',
   default: undefined,
 });
 
+function getInitialLanguage(): SupportedLanguage {
+  return i18n.resolvedLanguage?.startsWith('pl') ||
+    i18n.language.startsWith('pl')
+    ? 'pl'
+    : 'en';
+}
+
 export function LanguageSelectionScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { width, height } = useWindowDimensions();
 
+  const isLandscape = width > height;
   const isTablet = Math.min(width, height) >= 600;
-  const isCompactHeight = height < 700;
+  const isCompactHeight = height < 680;
 
-  const initialLanguage: SupportedLanguage = i18n.language.startsWith('pl')
-    ? 'pl'
-    : 'en';
+  const useTwoColumnLayout = isLandscape && width >= 700;
 
   const [selectedLanguage, setSelectedLanguage] =
-    useState<SupportedLanguage>(initialLanguage);
+    useState<SupportedLanguage>(getInitialLanguage);
 
   const selectLanguage = async (language: SupportedLanguage) => {
+    if (language === selectedLanguage) {
+      return;
+    }
+
+    const previousLanguage = selectedLanguage;
+
     setSelectedLanguage(language);
-    await i18n.changeLanguage(language);
+
+    try {
+      await i18n.changeLanguage(language);
+    } catch {
+      setSelectedLanguage(previousLanguage);
+    }
   };
 
   const confirmLanguage = () => {
@@ -54,19 +90,36 @@ export function LanguageSelectionScreen({ navigation }: Props) {
       edges={['top', 'right', 'bottom', 'left']}
       style={styles.safeArea}
     >
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={colors.lovabiesPurple}
-      />
+      <StatusBar barStyle="light-content" />
 
-      <View style={[styles.page, isCompactHeight && styles.compactPage]}>
-        <View style={[styles.content, isTablet && styles.tabletContent]}>
-          <View style={styles.headingSection}>
+      <ScrollView
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isCompactHeight && styles.compactScrollContent,
+        ]}
+      >
+        <View
+          style={[
+            styles.content,
+            isTablet && styles.tabletContent,
+            useTwoColumnLayout && styles.twoColumnContent,
+          ]}
+        >
+          <View
+            style={[
+              styles.headingSection,
+              useTwoColumnLayout && styles.headingColumn,
+            ]}
+          >
             <Text
-              adjustsFontSizeToFit
-              minimumFontScale={0.8}
-              numberOfLines={2}
-              style={[styles.title, isCompactHeight && styles.compactTitle]}
+              accessibilityRole="header"
+              style={[
+                styles.title,
+                isTablet && styles.tabletTitle,
+                isCompactHeight && styles.compactTitle,
+              ]}
             >
               {t('language.title')}
             </Text>
@@ -74,6 +127,7 @@ export function LanguageSelectionScreen({ navigation }: Props) {
             <Text
               style={[
                 styles.subtitle,
+                isTablet && styles.tabletSubtitle,
                 isCompactHeight && styles.compactSubtitle,
               ]}
             >
@@ -82,52 +136,51 @@ export function LanguageSelectionScreen({ navigation }: Props) {
           </View>
 
           <View
-            style={[styles.options, isCompactHeight && styles.compactOptions]}
+            style={[
+              styles.actionSection,
+              useTwoColumnLayout && styles.actionColumn,
+            ]}
           >
-            <LanguageOption
-              label={t('language.english')}
-              selected={selectedLanguage === 'en'}
-              compact={isCompactHeight}
-              onPress={() => {
-                void selectLanguage('en');
-              }}
-            />
+            <View
+              accessibilityRole="radiogroup"
+              style={[
+                styles.options,
+                isCompactHeight && styles.compactOptions,
+                useTwoColumnLayout && styles.twoColumnOptions,
+              ]}
+            >
+              {LANGUAGE_OPTIONS.map(option => (
+                <LanguageOption
+                  key={option.code}
+                  label={t(option.translationKey)}
+                  selected={selectedLanguage === option.code}
+                  compact={isCompactHeight}
+                  onPress={() => {
+                    void selectLanguage(option.code);
+                  }}
+                />
+              ))}
+            </View>
 
-            <LanguageOption
-              label={t('language.polish')}
-              selected={selectedLanguage === 'pl'}
-              compact={isCompactHeight}
-              onPress={() => {
-                void selectLanguage('pl');
-              }}
+            <LovabiesButton
+              label={t('language.confirm')}
+              variant="dark"
+              onPress={confirmLanguage}
+              style={[
+                styles.confirmButton,
+                isCompactHeight && styles.compactConfirmButton,
+              ]}
+              labelStyle={[
+                styles.confirmLabel,
+                isCompactHeight && styles.compactConfirmLabel,
+              ]}
             />
           </View>
-
-          <LovabiesButton
-            label={t('language.confirm')}
-            variant="dark"
-            onPress={confirmLanguage}
-            style={[
-              styles.confirmButton,
-              isCompactHeight && styles.compactConfirmButton,
-            ]}
-            labelStyle={[
-              styles.confirmLabel,
-              isCompactHeight && styles.compactConfirmLabel,
-            ]}
-          />
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
-type LanguageOptionProps = {
-  label: string;
-  selected: boolean;
-  compact: boolean;
-  onPress: () => void;
-};
 
 function LanguageOption({
   label,
@@ -140,6 +193,9 @@ function LanguageOption({
       accessibilityRole="radio"
       accessibilityLabel={label}
       accessibilityState={{ checked: selected }}
+      android_ripple={{
+        color: 'rgba(255, 255, 255, 0.12)',
+      }}
       onPress={onPress}
       style={({ pressed }) => [
         styles.option,
@@ -148,15 +204,16 @@ function LanguageOption({
         pressed && styles.pressedOption,
       ]}
     >
-      <View style={[styles.radioOuter, compact && styles.compactRadioOuter]}>
+      <View
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.radioOuter, compact && styles.compactRadioOuter]}
+      >
         {selected ? (
           <View style={[styles.radioDot, compact && styles.compactRadioDot]} />
         ) : null}
       </View>
 
       <Text
-        adjustsFontSizeToFit
-        minimumFontScale={0.8}
         numberOfLines={1}
         style={[styles.optionLabel, compact && styles.compactOptionLabel]}
       >
@@ -172,16 +229,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lovabiesPurple,
   },
 
-  page: {
-    flex: 1,
-    width: '100%',
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
-
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xl,
   },
 
-  compactPage: {
+  compactScrollContent: {
     paddingVertical: spacing.md,
   },
 
@@ -192,19 +247,42 @@ const styles = StyleSheet.create({
   },
 
   tabletContent: {
-    maxWidth: 680,
+    maxWidth: 720,
+  },
+
+  twoColumnContent: {
+    maxWidth: 1000,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxl,
   },
 
   headingSection: {
     width: '100%',
   },
 
+  headingColumn: {
+    flex: 1,
+  },
+
+  actionSection: {
+    width: '100%',
+  },
+
+  actionColumn: {
+    flex: 1,
+  },
+
   title: {
     color: colors.white,
     fontFamily: 'DynaPuff',
     fontSize: 30,
-    fontWeight: '700',
     lineHeight: 42,
+  },
+
+  tabletTitle: {
+    fontSize: 34,
+    lineHeight: 46,
   },
 
   compactTitle: {
@@ -220,8 +298,12 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontFamily: roundedFont,
     fontSize: 20,
-    fontWeight: '400',
     lineHeight: 30,
+  },
+
+  tabletSubtitle: {
+    fontSize: 22,
+    lineHeight: 32,
   },
 
   compactSubtitle: {
@@ -241,12 +323,18 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
 
+  twoColumnOptions: {
+    marginTop: 0,
+  },
+
   option: {
     width: '100%',
     minHeight: 94,
 
     flexDirection: 'row',
     alignItems: 'center',
+
+    overflow: 'hidden',
 
     borderWidth: 5,
     borderColor: 'transparent',
@@ -259,7 +347,7 @@ const styles = StyleSheet.create({
   },
 
   compactOption: {
-    minHeight: 72,
+    minHeight: 68,
     paddingVertical: spacing.sm,
   },
 
@@ -268,7 +356,7 @@ const styles = StyleSheet.create({
   },
 
   pressedOption: {
-    opacity: 0.82,
+    opacity: 0.88,
     transform: [{ scale: 0.99 }],
   },
 
@@ -304,12 +392,12 @@ const styles = StyleSheet.create({
 
   optionLabel: {
     flex: 1,
+    flexShrink: 1,
     marginLeft: spacing.lg,
 
     color: colors.white,
     fontFamily: 'DynaPuff',
     fontSize: 28,
-    fontWeight: '500',
   },
 
   compactOptionLabel: {
@@ -327,7 +415,6 @@ const styles = StyleSheet.create({
   confirmLabel: {
     fontFamily: 'DynaPuff',
     fontSize: 22,
-    fontWeight: '500',
   },
 
   compactConfirmLabel: {

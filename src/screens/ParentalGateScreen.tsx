@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -20,7 +21,69 @@ import { colors } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ParentalGate'>;
 
-const CORRECT_ANSWER = 30;
+type MathChallenge = {
+  question: string;
+  answer: number;
+};
+
+type ErrorType = 'empty' | 'incorrect' | null;
+
+function getRandomNumber(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function createMathChallenge(): MathChallenge {
+  const challengeType = getRandomNumber(1, 4);
+
+  switch (challengeType) {
+    case 1: {
+      const firstNumber = getRandomNumber(3, 15);
+      const secondNumber = getRandomNumber(2, 12);
+
+      return {
+        question: `${firstNumber} + ${secondNumber}`,
+        answer: firstNumber + secondNumber,
+      };
+    }
+
+    case 2: {
+      /*
+       * Generate subtraction without negative answers.
+       */
+      const answer = getRandomNumber(2, 15);
+      const numberToSubtract = getRandomNumber(2, 10);
+      const firstNumber = answer + numberToSubtract;
+
+      return {
+        question: `${firstNumber} − ${numberToSubtract}`,
+        answer,
+      };
+    }
+
+    case 3: {
+      const firstNumber = getRandomNumber(2, 9);
+      const secondNumber = getRandomNumber(2, 8);
+
+      return {
+        question: `${firstNumber} × ${secondNumber}`,
+        answer: firstNumber * secondNumber,
+      };
+    }
+
+    default: {
+      const outsideNumber = getRandomNumber(2, 5);
+      const firstInsideNumber = getRandomNumber(1, 4);
+      const secondInsideNumber = getRandomNumber(1, 4);
+
+      return {
+        question:
+          `${outsideNumber} × ` +
+          `(${firstInsideNumber} + ${secondInsideNumber})`,
+        answer: outsideNumber * (firstInsideNumber + secondInsideNumber),
+      };
+    }
+  }
+}
 
 export function ParentalGateScreen({ navigation }: Props) {
   const { t } = useTranslation();
@@ -29,18 +92,62 @@ export function ParentalGateScreen({ navigation }: Props) {
   const isTablet = Math.min(width, height) >= 600;
   const isCompactHeight = height < 760;
 
+  const [challenge, setChallenge] = useState<MathChallenge>(() =>
+    createMathChallenge(),
+  );
+
   const [answer, setAnswer] = useState('');
-  const [hasError, setHasError] = useState(false);
+  const [errorType, setErrorType] = useState<ErrorType>(null);
+
+  /*
+   * Generate a new equation every time this screen
+   * becomes active.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      setChallenge(createMathChallenge());
+      setAnswer('');
+      setErrorType(null);
+    }, []),
+  );
+
+  const handleAnswerChange = (value: string) => {
+    const numericValue = value.replace(/[^0-9]/g, '');
+
+    setAnswer(numericValue);
+
+    if (errorType !== null) {
+      setErrorType(null);
+    }
+  };
 
   const handleNext = () => {
-    if (Number(answer.trim()) === CORRECT_ANSWER) {
-      setHasError(false);
-      navigation.replace('Home');
+    const trimmedAnswer = answer.trim();
+
+    if (!trimmedAnswer) {
+      setErrorType('empty');
       return;
     }
 
-    setHasError(true);
+    if (Number(trimmedAnswer) !== challenge.answer) {
+      setErrorType('incorrect');
+      return;
+    }
+
+    setErrorType(null);
+    navigation.replace('Home');
   };
+
+  const errorMessage =
+    errorType === 'empty'
+      ? t('parental.emptyError', {
+          defaultValue: 'Please enter your answer.',
+        })
+      : errorType === 'incorrect'
+      ? t('parental.incorrectError', {
+          defaultValue: "Oops! That answer isn't right. Please try again.",
+        })
+      : null;
 
   return (
     <SafeAreaView
@@ -75,6 +182,7 @@ export function ParentalGateScreen({ navigation }: Props) {
           >
             <Text
               adjustsFontSizeToFit
+              minimumFontScale={0.8}
               numberOfLines={1}
               style={[styles.title, isCompactHeight && styles.compactTitle]}
             >
@@ -82,8 +190,6 @@ export function ParentalGateScreen({ navigation }: Props) {
             </Text>
 
             <Text
-              adjustsFontSizeToFit
-              numberOfLines={2}
               style={[
                 styles.subtitle,
                 isCompactHeight && styles.compactSubtitle,
@@ -93,14 +199,13 @@ export function ParentalGateScreen({ navigation }: Props) {
             </Text>
 
             <Text
-              adjustsFontSizeToFit
-              numberOfLines={1}
+              accessibilityLabel={`Equation: ${challenge.question}`}
               style={[
                 styles.equation,
                 isCompactHeight && styles.compactEquation,
               ]}
             >
-              {t('parental.question')}
+              {challenge.question}
             </Text>
 
             <View
@@ -113,13 +218,7 @@ export function ParentalGateScreen({ navigation }: Props) {
                 accessibilityLabel={t('parental.placeholder')}
                 keyboardType="number-pad"
                 maxLength={3}
-                onChangeText={value => {
-                  setAnswer(value);
-
-                  if (hasError) {
-                    setHasError(false);
-                  }
-                }}
+                onChangeText={handleAnswerChange}
                 onSubmitEditing={handleNext}
                 placeholder={t('parental.placeholder')}
                 placeholderTextColor="#8E8E8E"
@@ -128,14 +227,16 @@ export function ParentalGateScreen({ navigation }: Props) {
                   styles.input,
                   isTablet && styles.tabletInput,
                   isCompactHeight && styles.compactInput,
-                  hasError && styles.inputError,
+                  errorType !== null && styles.inputError,
                 ]}
                 textAlignVertical="center"
                 value={answer}
               />
 
-              {hasError ? (
-                <Text style={styles.errorText}>{t('parental.error')}</Text>
+              {errorMessage ? (
+                <Text accessibilityLiveRegion="polite" style={styles.errorText}>
+                  {errorMessage}
+                </Text>
               ) : null}
             </View>
 
@@ -183,10 +284,6 @@ const styles = StyleSheet.create({
     paddingVertical: 28,
   },
 
-  /*
-   * Tablet keeps the same mobile sizing.
-   * Only the maximum content width changes slightly.
-   */
   tabletPage: {
     maxWidth: 700,
     paddingHorizontal: 36,
@@ -199,14 +296,14 @@ const styles = StyleSheet.create({
   title: {
     color: colors.white,
     fontFamily: 'DynaPuff',
-    fontWeight: '700',
     fontSize: 34,
-    lineHeight: 42,
+    fontWeight: '700',
+    lineHeight: 44,
   },
 
   compactTitle: {
     fontSize: 29,
-    lineHeight: 35,
+    lineHeight: 37,
   },
 
   subtitle: {
@@ -231,16 +328,16 @@ const styles = StyleSheet.create({
     marginLeft: 24,
 
     color: colors.yellow,
-    fontFamily: 'sans-serif-rounded',
+    fontFamily: 'DynaPuff',
     fontSize: 40,
-    fontWeight: '900',
-    lineHeight: 48,
+    fontWeight: '700',
+    lineHeight: 52,
   },
 
   compactEquation: {
     marginTop: 22,
     fontSize: 34,
-    lineHeight: 41,
+    lineHeight: 44,
   },
 
   inputWrapper: {
@@ -252,13 +349,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 
-  /*
-   * This is deliberately smaller than the old 170–230px box.
-   * It still resembles the reference but allows the full page to fit.
-   */
   input: {
-    height: 120,
     width: '100%',
+    height: 120,
 
     borderRadius: 16,
     backgroundColor: colors.white,
@@ -292,33 +385,30 @@ const styles = StyleSheet.create({
   },
 
   inputError: {
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: colors.danger,
   },
 
   errorText: {
-    marginTop: 8,
+    marginTop: 10,
 
     color: '#FFD9D6',
     fontFamily: 'sans-serif-rounded',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
+    lineHeight: 21,
   },
 
   nextButton: {
-    minHeight: 66,
-    marginTop: 34,
+    marginTop: 30,
   },
 
   compactNextButton: {
-    minHeight: 54,
     marginTop: 22,
   },
 
   nextButtonLabel: {
     fontSize: 22,
-    fontWeight: '900',
-    fontFamily: 'DynaPuff',
   },
 
   compactNextButtonLabel: {
